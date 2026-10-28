@@ -1,0 +1,36 @@
+{
+  "version": "prototype-priority-v1",
+  "description": "Illustrative local review-priority scoring only. This is not an official AICTE policy, deadline, or decision rule.",
+  "eligible_stages": ["submitted", "review", "needs_information"],
+  "factors": {
+    "missing_required_documents": {
+      "enabled": true,
+      "points_per_missing_document": 12,
+      "max_points": 36
+    },
+    "evidence_attention": {
+      "enabled": true,
+      "points_by_status": { "FAIL": 20, "INDETERMINATE": 10 },
+      "points_if_no_checks": 5,
+      "max_points": 40
+    },
+    "outstanding_clarification": {
+      "enabled": true,
+      "stages": ["needs_information"],
+      "points": 15
+    },
+    "review_wait": {
+      "enabled": true,
+      "eligible_stages": ["submitted", "review", "needs_information"],
+      "minimum_wait_days": 2,
+      "points_per_day_after_threshold": 5,
+      "max_points": 25
+    }
+  },
+  "categories": [
+    { "key": "routine", "label": "Routine", "minimum_score": 0 },
+    { "key": "attention", "label": "Needs attention", "minimum_score": 25 },
+    { "key": "urgent", "label": "Urgent review", "minimum_score": 50 },
+    { "key": "highest_priority", "label": "Highest priority", "minimum_score": 75 }
+  ]
+}

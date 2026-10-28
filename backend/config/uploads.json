@@ -1,0 +1,9 @@
+{
+  "version": "prototype-uploads-v1",
+  "max_file_size_bytes": 10485760,
+  "allowed_file_types": [
+    { "file_format": "pdf", "extensions": [".pdf"], "media_type": "application/pdf" },
+    { "file_format": "png", "extensions": [".png"], "media_type": "image/png" },
+    { "file_format": "jpeg", "extensions": [".jpg", ".jpeg"], "media_type": "image/jpeg" }
+  ]
+}

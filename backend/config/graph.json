@@ -1,0 +1,10 @@
+{
+  "version": "prototype-graph-v1",
+  "max_traversal_depth": 6,
+  "max_nodes": 500,
+  "relationship_types": [
+    { "key": "renewal_of", "label": "Renewal of", "allow_cycles": false },
+    { "key": "replacement_of", "label": "Replacement of", "allow_cycles": false },
+    { "key": "related_to", "label": "Related to", "allow_cycles": true }
+  ]
+}

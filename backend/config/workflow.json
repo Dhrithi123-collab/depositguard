@@ -1,0 +1,24 @@
+{
+  "version": "prototype-demo-v2",
+  "description": "Illustrative local-development workflow only. This is not an AICTE process or policy.",
+  "initial_stage": "draft",
+  "stages": [
+    { "key": "draft", "label": "Draft" },
+    { "key": "submitted", "label": "Submitted" },
+    { "key": "review", "label": "In review" },
+    { "key": "needs_information", "label": "Needs information" },
+    { "key": "completed", "label": "Completed" }
+  ],
+  "transitions": [
+    { "from_stage": "draft", "to_stage": "submitted" },
+    { "from_stage": "submitted", "to_stage": "review" },
+    { "from_stage": "review", "to_stage": "needs_information" },
+    { "from_stage": "needs_information", "to_stage": "submitted" },
+    { "from_stage": "review", "to_stage": "completed" }
+  ],
+  "decision_stages": ["completed"],
+  "clarification_stages": ["needs_information"],
+  "document_requirements": [
+    { "key": "illustrative_supporting_evidence", "label": "Illustrative supporting evidence", "required": false }
+  ]
+}

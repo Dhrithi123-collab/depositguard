@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python test and cache files
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Frontend dependencies and build output
+node_modules/
+dist/
+coverage/
+
+# Local databases and backups
+*.db
+*.sqlite
+*.sqlite3
+*.db-*
+*.sqlite-*
+*.bak
+
+# Local uploads and private document storage
+uploads/
+storage/
+private_storage/
+private_documents/
+
+# Logs and operating system files
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
