@@ -32,6 +32,12 @@ describe('page routing', () => {
         user: { id: 'synthetic-user', email: 'local@example.test', display_name: 'Local Reviewer', system_admin: true, active: true, must_change_password: false, memberships: [], created_at: '2026-01-01T00:00:00Z' },
       }), { status: 200, headers: { 'Content-Type': 'application/json' } })
       if (url.endsWith('/api/institutions?limit=500')) return new Response(JSON.stringify([{ id: 'synthetic-institution', name: 'Synthetic Institution', created_at: '2026-01-01T00:00:00Z' }]), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      if (url.endsWith('/api/workflow/configuration')) return new Response(JSON.stringify({ config: { version: 'v1', stages: [], transitions: [], document_requirements: [{ key: 'evidence', label: 'Supporting Evidence', required: false }] } }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      if (url.endsWith('/api/graph/policy')) return new Response(JSON.stringify({ policy: { version: 'v1', relationship_types: [], max_traversal_depth: 3, max_nodes: 50 } }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      if (url.endsWith('/fdr-records?limit=500')) return new Response(JSON.stringify([{ id: 'test-fdr-1', instrument_reference: 'REF-001', workflow_stage: 'draft', institution_id: 'synthetic-institution', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z' }]), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      if (url.endsWith('/fdr-records/test-fdr-1')) return new Response(JSON.stringify({ id: 'test-fdr-1', instrument_reference: 'REF-001', workflow_stage: 'draft', institution_id: 'synthetic-institution', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z' }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      if (url.endsWith('/fdr-records/test-fdr-1/documents')) return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      if (url.endsWith('/fdr-records/test-fdr-1/evidence-checks')) return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } })
       return new Response(JSON.stringify({ detail: 'API not configured in route test' }), { status: 503, headers: { 'Content-Type': 'application/json' } })
     }))
   })
@@ -100,5 +106,17 @@ describe('page routing', () => {
     fireEvent.change(screen.getByLabelText(/^Confirm password/i), { target: { value: 'different' } })
     fireEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
     expect((await screen.findByRole('alert')).textContent).toContain('Passwords do not match')
+  })
+
+  it('displays document upload and evidence panels on /documents when an FDR record is selected', async () => {
+    renderApp('/documents')
+    expect(await screen.findByRole('heading', { name: 'Documents', level: 1 })).toBeTruthy()
+    const fdrOption = await screen.findByRole('option', { name: /test-fdr-1/i })
+    expect(fdrOption).toBeTruthy()
+    const fdrSelect = screen.getByLabelText('FDR record') as HTMLSelectElement
+    fireEvent.change(fdrSelect, { target: { value: 'test-fdr-1' } })
+    expect(await screen.findByRole('heading', { name: 'Documents and versions', level: 2 })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Evidence and integrity history', level: 2 })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /upload document/i })).toBeTruthy()
   })
 })

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type FormEvent, type ReactNode } from 'react'
 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { LogIn, ShieldCheck } from 'lucide-react'
 import { ApiError, api, setCsrfToken, type AuthSession } from '../services/api'
 
@@ -135,6 +135,7 @@ export function PasswordChangeScreen() {
 }
 
 export function SignUpScreen() {
+  const navigate = useNavigate();
   const { register } = useAuth();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -159,7 +160,7 @@ export function SignUpScreen() {
         role,
       });
       // Established session automatically; navigate to /dashboard
-      window.location.href = '/dashboard';
+      navigate('/dashboard');
     } catch (reason) {
       setFormError(errorMessage(reason));
     } finally {

@@ -32,6 +32,16 @@ function App() {
     window.dispatchEvent(new CustomEvent('depositguard:search-record', { detail: search }));
   };
 
+  if (auth.loading) {
+    return (
+      <main className="auth-page">
+        <section className="auth-card" role="status">
+          <p>Loading session…</p>
+        </section>
+      </main>
+    );
+  }
+
   // Public routes
   if (location.pathname === '/' ) {
     return auth.session ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;

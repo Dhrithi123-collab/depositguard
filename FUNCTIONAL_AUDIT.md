@@ -362,3 +362,38 @@ npm run build
 4. As an admin, create an FDR in the synthetic institution. As a document officer, upload two distinct synthetic valid files to one logical document and confirm version IDs, timestamps, metadata and digests remain distinct. Run integrity checks on both versions and confirm returned status/result and evidence link each exact version. Try `.exe`, over-policy-size, and missing-file uploads; no UI should claim success.
 5. As a reviewer, create a same-institution relationship and attempt a cross-institution target. Try a configured clarification transition and a decision transition. Confirm API role rejection, graph updates, and audit refresh after successful action.
 6. Sign out and refresh a protected route; confirm sign-in returns. As an admin, deactivate the test account and confirm its old session no longer accesses protected APIs. Force an API/network failure and confirm loading/error/retry states remain distinct from empty data.
+
+
+## Document-Management Visibility & Comprehensive Role Audit Follow-up (2026-10-29)
+
+### Critical Known Bug Diagnosis and Resolution
+
+1. **Defect**: On the `/documents` page, selecting an authorized institution and an FDR record failed to display the document upload panel, version history, integrity check buttons, and evidence history.
+2. **Root Cause**:
+   - In `frontend/src/components/FdrWorkspace.tsx`, `api.getRecord(institutionId, recordId)` was conditionally requested only when `page === 'fdr-records'`. On `/documents`, `api.getRecord` was skipped, leaving `detail.record` as `undefined`.
+   - The JSX detail container at line 385 used `{detail.record && <>` to wrap all subresource detail sections, including `#record-documents` and `#record-evidence`.
+   - Because `detail.record` was `undefined`, React skipped rendering the entire subresource column on `/documents` (and similarly on `/relationships`, `/review-queue`, and `/audit-trail`).
+3. **Repair**:
+   - Updated `FdrWorkspace.tsx` so that `api.getRecord(institutionId, recordId)` is unconditionally requested when an FDR record is selected, ensuring record metadata is always available across tabs.
+   - Decoupled `<div className="detail-columns">` from `{detail.record && <>`, gating only `#record-summary` on `fdr-records` by `detail.record`.
+   - Corrected JSX tag hierarchy and fragments.
+   - Added a direct regression test in `frontend/tests/routes.test.tsx` verifying that selecting an FDR record on `/documents` immediately renders the "Documents and versions" and "Evidence and integrity history" panels along with the file upload controls.
+
+### Role-Based Access Control Audit
+
+| Role | Policy-Permitted Actions | Tested & Verified Behavior |
+| --- | --- | --- |
+| **System Administrator** | User provisioning, institution creation, membership assignment, password resets, active state toggles, security audit view. | Confirmed backend route guards (`require_system_admin`), account provisioning API, user administration panel in Settings. |
+| **Institution Administrator** | FDR record creation, non-decision workflow transitions, viewing records, documents, queue, and relationships. | Confirmed record creation form visibility, non-decision transition options, institution scoping. |
+| **Document Officer** | Viewing assigned institution records, document uploading, immutable version inspection, SHA-256 integrity checks, evidence check history. | Verified upload panel and integrity check buttons display upon FDR record selection. Upload size limits and allowed file types enforced by backend. |
+| **Reviewer** | Clarification workflow transitions, relationship creation, BFS/DFS traversal, integrity verification, advisory queue review. | Confirmed clarification transition filtering, relationship recording form, graph policy enforcement, and cycle detection. |
+| **Approver** | Decision workflow transitions, integrity verification, audit log review. | Confirmed decision stage transition filtering, role validation in `routes.py`, rejection of unauthorized non-decision stages. |
+| **Auditor** | Read-only observation across dashboard, FDR records, documents, evidence, relationships, queue, and audit trail. | Confirmed mutation controls (Create, Upload, Apply Transition, Record Relationship) are hidden or disabled for auditor role. |
+
+### Verification Results
+
+- **Backend Test Suite**: `python -m pytest -q` → **67 passed, 0 failed** (89.41s).
+- **Frontend Test Suite**: `npm test` → **19 passed, 0 failed** (6 Node regression tests + 13 Vitest route and component tests).
+- **TypeScript Type Check**: `npx tsc -b --pretty false` → **exit code 0** (clean compilation).
+- **Production Build**: `npm run build` → **exit code 0** (1,602 modules transformed, bundle size 344 kB JS / 37.9 kB CSS).
+- **Dependency Audit**: `npm audit` → **0 vulnerabilities**.

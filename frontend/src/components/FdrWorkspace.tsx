@@ -179,7 +179,7 @@ export function FdrWorkspace({ onInstitutionChange, onDataChange, overviewRefres
       catch (error) { return { error } as const }
     }
     const requests = Promise.all([
-      read(page === 'fdr-records' ? api.getRecord(institutionId, recordId) : undefined),
+      read(api.getRecord(institutionId, recordId)),
       read(page === 'audit-trail' ? api.getAudit(institutionId, recordId) : undefined),
       read(page === 'documents' ? api.listDocuments(institutionId, recordId) : undefined),
       read(page === 'documents' ? api.listEvidence(institutionId, recordId) : undefined),
@@ -372,6 +372,7 @@ export function FdrWorkspace({ onInstitutionChange, onDataChange, overviewRefres
         </div>}
         {page === 'fdr-records' && !!records.length && (canManageRecords ? <form onSubmit={createRecord} className="workspace-new-record"><input aria-label="Optional instrument reference" value={instrumentReference} onChange={(event) => setInstrumentReference(event.target.value)} placeholder="Optional synthetic reference for a new record" maxLength={120} /><button className="text-button" disabled={busy}><Plus size={14} /> New FDR record</button></form> : <p className="detail-empty">Your role allows read-only access to FDR records.</p>)}
       </>}
+
       {(actionError || actionNotice) && <div className={`${actionError ? 'workspace-inline-error' : 'workspace-inline-success'} workspace-feedback-toast`} role="status" aria-live={actionError ? 'assertive' : 'polite'}>{actionError || actionNotice}</div>}
     </section>}
 
@@ -382,8 +383,8 @@ export function FdrWorkspace({ onInstitutionChange, onDataChange, overviewRefres
       {detail.loading && <div className="panel queue-state">Loading record, document versions, audit, and evidence…</div>}
       {!detail.loading && hasDetailReadError && <div className="panel workspace-inline-error" role="alert"><AlertCircle size={15} /> One or more selected-record reads failed. Refresh to retry failed details and version histories.<button className="text-button" onClick={() => setRefreshToken((value) => value + 1)} disabled={busy}>Retry record details</button></div>}
       {detail.recordError && <div className="panel workspace-inline-error"><AlertCircle size={15} /> Record detail unavailable: {detail.recordError}</div>}
-      {detail.record && <>
-        {page === 'fdr-records' && <section className="panel record-summary">
+
+      {page === 'fdr-records' && detail.record && <section className="panel record-summary">
           <div className="panel-heading"><div><h2>{detail.record.instrument_reference || 'FDR record'}</h2><p className="record-id">{detail.record.id}</p></div><span className="stage-badge">{detail.record.workflow_stage.replace(/_/g, ' ')}</span></div>
           <div className="record-summary-meta"><span>Created {dateText(detail.record.created_at)}</span><span>Updated {dateText(detail.record.updated_at)}</span></div>
           {availableTransitions.length > 0 && canTransition && <form className="transition-form" onSubmit={transitionRecord}>
@@ -469,7 +470,7 @@ export function FdrWorkspace({ onInstitutionChange, onDataChange, overviewRefres
             <div className="audit-list">{detail.audit.map((item) => <article key={item.id} className="audit-row"><span className="audit-dot" /><div><strong>{item.event_type.replace(/_/g, ' ')}</strong><span>{item.from_stage && item.to_stage ? `${item.from_stage} → ${item.to_stage}` : item.reason || 'Recorded event'}</span><small>{dateText(item.created_at)} · actor reference {item.actor_id} (historical IDs may be unverified) · config {item.configuration_version ?? 'unversioned'}</small></div></article>)}</div>
           </section>}
         </div>
-      </>}
+
     </section>}
   </>
 }

@@ -174,11 +174,11 @@ def register_user(payload: UserRegistrationRequest, request: Request, response: 
     settings = get_settings()
     response.set_cookie(
         SESSION_COOKIE, token, max_age=settings.auth_session_minutes * 60,
-        httponly=True, secure=settings.auth_cookie_secure, samesite="strict", path="/",
+        httponly=True, secure=settings.auth_cookie_secure, samesite="lax", path="/",
     )
     response.set_cookie(
         CSRF_COOKIE, csrf_token, max_age=settings.auth_session_minutes * 60,
-        httponly=False, secure=settings.auth_cookie_secure, samesite="strict", path="/",
+        httponly=False, secure=settings.auth_cookie_secure, samesite="lax", path="/",
     )
     return {"user": user_response(db, context.user), "csrf_token": csrf_token}
 
@@ -189,11 +189,11 @@ def login(payload: LoginRequest, request: Request, response: Response, db: Sessi
     settings = get_settings()
     response.set_cookie(
         SESSION_COOKIE, token, max_age=settings.auth_session_minutes * 60,
-        httponly=True, secure=settings.auth_cookie_secure, samesite="strict", path="/",
+        httponly=True, secure=settings.auth_cookie_secure, samesite="lax", path="/",
     )
     response.set_cookie(
         CSRF_COOKIE, csrf_token, max_age=settings.auth_session_minutes * 60,
-        httponly=False, secure=settings.auth_cookie_secure, samesite="strict", path="/",
+        httponly=False, secure=settings.auth_cookie_secure, samesite="lax", path="/",
     )
     return {"user": user_response(db, context.user), "csrf_token": csrf_token}
 
@@ -214,8 +214,8 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)) 
     context.session.revoked_at = utc_now()
     record_security_event(db, context.user.id, "logout")
     db.commit()
-    response.delete_cookie(SESSION_COOKIE, path="/", samesite="strict")
-    response.delete_cookie(CSRF_COOKIE, path="/", samesite="strict")
+    response.delete_cookie(SESSION_COOKIE, path="/", samesite="lax")
+    response.delete_cookie(CSRF_COOKIE, path="/", samesite="lax")
     response.status_code = status.HTTP_204_NO_CONTENT
     return response
 
